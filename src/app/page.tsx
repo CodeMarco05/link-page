@@ -6,7 +6,7 @@ import GridDivider from "../components/GridDivider";
 export default function Home() {
   return (
     <div className="grid grid-rows-[1px_1fr_20px] items-center justify-items-center min-h-screen p-2 pb-20 gap-24 sm:gap-16 sm:p-20">
-      <div className="flex items-center justify-center gap-6 mt-15 sm:mt-10">
+      <div className="flex items-center justify-center gap-6 mt-15 sm:mt-10 lg:mt-0">
         {/* Logo */}
         <Image
           src="/Logo.svg"
@@ -22,7 +22,7 @@ export default function Home() {
         </div>
       </div>
       {/* Grid of Link Tiles */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-9 w-full mt-8 sm:mt-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5 w-full mt-8 sm:mt-4 lg:mt-0">
 
         <GridDivider label="Hosting & Code" />
 
@@ -42,7 +42,7 @@ export default function Home() {
           title="Proxmox"
           subtitle="Server Node 1 - Self Hosted S1"
           imageUrl="/cardImages/dev/proxmox.svg"
-          href="https://100.64.0.100:8006/"
+          href="https://proxmox.lab.marco-brandt.com/"
         />
         <LinkTile
           title="Tailscale"
@@ -68,7 +68,7 @@ export default function Home() {
           title="Proxy Manager Observe"
           subtitle="Observe shared Proxy Manager"
           imageUrl="/cardImages/dev/nginx-proxy-manager.svg"
-          href="https://proxy-manager.lab.marco-brandt.com/"
+          href="https://proxy-manager.observe.lab.marco-brandt.com/"
         />
 
         <LinkTile
@@ -76,6 +76,50 @@ export default function Home() {
           subtitle="Project Management"
           imageUrl="/cardImages/dev/trello.svg"
           href="https://trello.com/u/marcobrandt16/boards"
+        />
+
+        <LinkTile
+          title="Docker Hub"
+          subtitle="(marco1205) - Docker Hub"
+          imageUrl="/cardImages/dev/docker-hub.svg"
+          href="https://hub.docker.com/repositories/marco1205"
+        />
+
+        <GridDivider label="Tools" />
+
+        <LinkTile
+          title="Figma"
+          subtitle="Open Figma application"
+          imageUrl="/cardImages/dev/figma.svg"
+          href="figma://"
+        />
+
+        <LinkTile
+          title="Anas Internet Archive"
+          subtitle="Book Store"
+          imageUrl="/cardImages/tools/anas-archive.svg"
+          href="https://annas-archive.org/"
+        />
+
+        <LinkTile
+          title="Unix Time"
+          subtitle="Website to convert and get Unix Time"
+          imageUrl="/cardImages/tools/unix.svg"
+          href="https://www.unixtimestamp.com/"
+        />
+
+        <LinkTile
+          title="Excalidraw"
+          subtitle="The little drawing tool"
+          imageUrl="/cardImages/tools/excalidraw.svg"
+          href="https://excalidraw.com/"
+        />
+
+        <LinkTile
+          title="DeepL"
+          subtitle="Translation"
+          imageUrl="/cardImages/tools/deepl.svg"
+          href="https://www.deepl.com/"
         />
 
         <GridDivider label="Personal & Social" />
@@ -110,37 +154,6 @@ export default function Home() {
           imageUrl="/cardImages/personal/icloud.svg"
           href="https://www.icloud.com/"
         />
-
-        <GridDivider label="Tools" />
-
-        <LinkTile
-          title="Anas Internet Archive"
-          subtitle="Book Store"
-          imageUrl="/cardImages/tools/anas-archive.svg"
-          href="https://annas-archive.org/"
-        />
-
-        <LinkTile
-          title="Unix Time"
-          subtitle="Website to convert and get Unix Time"
-          imageUrl="/cardImages/tools/unix.svg"
-          href="https://www.unixtimestamp.com/"
-        />
-
-        <LinkTile
-          title="Excalidraw"
-          subtitle="The little drawing tool"
-          imageUrl="/cardImages/tools/excalidraw.svg"
-          href="https://excalidraw.com/"
-        />
-
-        <LinkTile
-          title="DeepL"
-          subtitle="Translation"
-          imageUrl="/cardImages/tools/deepl.svg"
-          href="https://www.deepl.com/"
-        />
-
       </div>
     </div>
   );

@@ -4,7 +4,7 @@ interface GridDividerProps {
 
 export default function GridDivider({ label }: GridDividerProps) {
   return (
-    <div className="col-span-full flex items-center justify-center py-4 my-2">
+    <div className="col-span-full flex items-center justify-center py-1 my-1 lg:mt-0">
       <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent"></div>
       {label && (
         <>
