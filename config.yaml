@@ -1,0 +1,20 @@
+title: Dashboard
+style: modern
+theme: dark
+columns: 3
+linkTarget: current
+
+groups:
+  - name: Dev Tools
+    items:
+      - name: GitHub
+        url: https://github.com
+        icon: https://cdn.simpleicons.org/github
+        type: page-monitored
+        okStatus: [200, 301]
+      - name: Docker Hub
+        url: https://hub.docker.com
+        icon: https://cdn.simpleicons.org/docker
+      - name: Proxmox
+        url: https://proxmox.example.com
+        icon: https://cdn.simpleicons.org/proxmox
