@@ -18,7 +18,9 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN pnpm build
+# git does not track empty directories, so public/ may be absent in a fresh
+# checkout. Create it here to keep the runner's COPY valid either way.
+RUN mkdir -p public && pnpm build
 
 # ---- runner: minimal runtime image ----
 FROM base AS runner
