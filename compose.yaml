@@ -16,7 +16,9 @@ services:
     volumes:
       # Edit config.yaml on the host; changes apply on the next page load.
       - ./config.yaml:/config/config.yaml:ro
-      # Monitor history survives container restarts.
+      # Monitor history survives container restarts. The container runs as uid
+      # 1001, and a bind mount keeps the host's ownership — so grant it once or
+      # monitoring silently writes nothing: sudo chown -R 1001:1001 ./data
       - ./data:/data
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
