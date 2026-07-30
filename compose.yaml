@@ -1,0 +1,26 @@
+services:
+  link-page:
+    build:
+      context: .
+    image: link-page
+    container_name: link-page
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      # Path to the dashboard config, read on every request.
+      CONFIG_PATH: /config/config.yaml
+      # Where monitor history JSON is persisted.
+      DATA_DIR: /data
+      TZ: ${TZ:-Europe/Berlin}
+    volumes:
+      # Edit config.yaml on the host; changes apply on the next page load.
+      - ./config.yaml:/config/config.yaml:ro
+      # Monitor history survives container restarts.
+      - ./data:/data
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3

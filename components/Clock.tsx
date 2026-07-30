@@ -1,6 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { intervalSubscribe, useClientValue } from "@/lib/use-client-value";
+
+// Seconds, not a Date: the snapshot must be a stable primitive between ticks or
+// useSyncExternalStore re-renders in a loop.
+function currentSecond(): number {
+  return Math.floor(Date.now() / 1000);
+}
+
+const subscribeToSeconds = intervalSubscribe(1000);
 
 const timeFormatter = new Intl.DateTimeFormat(undefined, {
   hour: "2-digit",
@@ -16,17 +24,14 @@ const dateFormatter = new Intl.DateTimeFormat(undefined, {
 });
 
 export function Clock() {
-  const [now, setNow] = useState<Date | null>(null);
+  // null on the server and during hydration, so no mismatched time is rendered.
+  const second = useClientValue(currentSecond, null, subscribeToSeconds);
 
-  useEffect(() => {
-    setNow(new Date());
-    const interval = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  if (!now) {
+  if (second === null) {
     return <div className="h-[3.25rem]" />;
   }
+
+  const now = new Date(second * 1000);
 
   return (
     <div className="flex flex-col items-end gap-0.5 text-right">

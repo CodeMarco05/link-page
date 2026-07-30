@@ -1,37 +1,12 @@
 "use client";
 
-import { useState, type CSSProperties } from "react";
+import { useState } from "react";
 import type { MonitorSample } from "@/lib/monitor/store";
-
-const statusColors: Record<MonitorSample["status"], string> = {
-  up: "bg-emerald-500",
-  degraded: "bg-amber-500",
-  down: "bg-red-500",
-};
-
-const statusGlowColors: Record<MonitorSample["status"], string> = {
-  up: "#10b981",
-  degraded: "#f59e0b",
-  down: "#ef4444",
-};
-
-const statusLabels: Record<MonitorSample["status"], string> = {
-  up: "Up",
-  degraded: "Degraded",
-  down: "Down",
-};
-
-const timeFormatter = new Intl.DateTimeFormat(undefined, {
-  hour: "2-digit",
-  minute: "2-digit",
-  second: "2-digit",
-});
+import { glowStyle, statusColors, statusLabels, timeFormatter } from "@/lib/monitor/status-display";
+import { tooltipSurface } from "@/lib/styles/tooltip";
 
 function HeartbeatBar({ sample, isLatest }: { sample: MonitorSample; isLatest: boolean }) {
   const [hovered, setHovered] = useState(false);
-  const glowStyle = isLatest
-    ? ({ "--glow-color": statusGlowColors[sample.status] } as CSSProperties)
-    : undefined;
 
   return (
     <span
@@ -41,12 +16,12 @@ function HeartbeatBar({ sample, isLatest }: { sample: MonitorSample; isLatest: b
     >
       <span
         className={`h-2.5 w-2.5 shrink-0 rounded-sm ${statusColors[sample.status]} ${isLatest ? "heartbeat-glow" : ""}`}
-        style={glowStyle}
+        style={isLatest ? glowStyle(sample.status) : undefined}
       />
       {hovered && (
         <span
           role="tooltip"
-          className="pointer-events-none absolute bottom-full left-1/2 z-30 mb-1.5 w-max max-w-[14rem] -translate-x-1/2 whitespace-normal rounded-md border border-[var(--border)] bg-[var(--surface)] px-2 py-1.5 text-xs text-[var(--foreground)] shadow-lg"
+          className={`${tooltipSurface} pointer-events-none bottom-full left-1/2 z-30 mb-1.5 w-max max-w-[14rem] -translate-x-1/2 px-2 py-1.5`}
         >
           <span className="block font-medium">
             {statusLabels[sample.status]} &middot; {sample.latencyMs}ms
@@ -69,7 +44,11 @@ export function Heartbeat({ history }: { history: MonitorSample[] }) {
   return (
     <span className="flex w-40 flex-wrap gap-1">
       {newestFirst.map((sample, index) => (
-        <HeartbeatBar key={sample.checkedAt} sample={sample} isLatest={index === 0} />
+        <HeartbeatBar
+          key={`${sample.checkedAt}-${index}`}
+          sample={sample}
+          isLatest={index === 0}
+        />
       ))}
     </span>
   );

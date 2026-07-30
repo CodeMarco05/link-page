@@ -1,7 +1,7 @@
 import { mkdirSync, readFileSync, writeFileSync, readdirSync, rmSync } from "node:fs";
 import path from "node:path";
 import { createHash } from "node:crypto";
-import type { MonitorResult, MonitorStatus } from "./check";
+import type { MonitorResult } from "./check";
 
 export type MonitorSample = MonitorResult & { checkedAt: number };
 
@@ -54,6 +54,15 @@ function hydrateFromDisk(): void {
   }
 }
 
+/**
+ * The only way to reach the cache, so on-demand hydration can never be
+ * forgotten by a caller.
+ */
+function getCache(): Map<string, MonitorSample[]> {
+  hydrateFromDisk();
+  return memoryCache;
+}
+
 function pruneToWindow(samples: MonitorSample[]): MonitorSample[] {
   const cutoff = Date.now() - HISTORY_WINDOW_MS;
   return samples.filter((sample) => sample.checkedAt >= cutoff);
@@ -66,18 +75,17 @@ function persist(url: string, samples: MonitorSample[]): void {
 }
 
 export function recordSample(url: string, result: MonitorResult): void {
-  hydrateFromDisk();
+  const cache = getCache();
 
-  const existing = memoryCache.get(url) ?? [];
+  const existing = cache.get(url) ?? [];
   const updated = pruneToWindow([...existing, { ...result, checkedAt: Date.now() }]);
 
-  memoryCache.set(url, updated);
+  cache.set(url, updated);
   persist(url, updated);
 }
 
 export function removeUrl(url: string): void {
-  hydrateFromDisk();
-  memoryCache.delete(url);
+  getCache().delete(url);
   try {
     rmSync(getFilePathForUrl(url), { force: true });
   } catch {
@@ -86,8 +94,7 @@ export function removeUrl(url: string): void {
 }
 
 export function pruneOrphanedUrls(activeUrls: Set<string>): void {
-  hydrateFromDisk();
-  for (const url of memoryCache.keys()) {
+  for (const url of getCache().keys()) {
     if (!activeUrls.has(url)) {
       removeUrl(url);
     }
@@ -109,7 +116,7 @@ function snapshotFromSamples(samples: MonitorSample[]): MonitorSnapshot | undefi
     return undefined;
   }
 
-  const upCount = recentSamples.filter((sample) => sample.status === ("up" as MonitorStatus)).length;
+  const upCount = recentSamples.filter((sample) => sample.status === "up").length;
   const uptimePercent = (upCount / recentSamples.length) * 100;
   const latest = recentSamples[recentSamples.length - 1];
   const history = recentSamples.slice(-HEARTBEAT_HISTORY_LENGTH);
@@ -117,19 +124,9 @@ function snapshotFromSamples(samples: MonitorSample[]): MonitorSnapshot | undefi
   return { latest, uptimePercent, sampleCount: recentSamples.length, history };
 }
 
-export function getSnapshot(url: string): MonitorSnapshot | undefined {
-  hydrateFromDisk();
-  const samples = memoryCache.get(url);
-  if (!samples) {
-    return undefined;
-  }
-  return snapshotFromSamples(samples);
-}
-
 export function getAllSnapshots(): Map<string, MonitorSnapshot> {
-  hydrateFromDisk();
   const snapshots = new Map<string, MonitorSnapshot>();
-  for (const [url, samples] of memoryCache) {
+  for (const [url, samples] of getCache()) {
     const snapshot = snapshotFromSamples(samples);
     if (snapshot) {
       snapshots.set(url, snapshot);

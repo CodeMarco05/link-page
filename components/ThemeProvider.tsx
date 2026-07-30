@@ -1,10 +1,10 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, type ReactNode } from "react";
 import type { ThemeName } from "@/lib/config/schema";
 import { themeClassName } from "@/lib/styles/themes";
-
-const STORAGE_KEY = "theme-override";
+import { readStoredTheme, subscribeToStoredTheme, writeStoredTheme } from "@/lib/theme-storage";
+import { useClientValue } from "@/lib/use-client-value";
 
 type ThemeContextValue = {
   theme: ThemeName;
@@ -13,14 +13,6 @@ type ThemeContextValue = {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-function readStoredTheme(): ThemeName | null {
-  if (typeof window === "undefined") {
-    return null;
-  }
-  const stored = window.localStorage.getItem(STORAGE_KEY);
-  return stored === "dark" || stored === "light" || stored === "auto" ? stored : null;
-}
-
 export function ThemeProvider({
   defaultTheme,
   children,
@@ -28,19 +20,15 @@ export function ThemeProvider({
   defaultTheme: ThemeName;
   children: ReactNode;
 }) {
-  const [theme, setTheme] = useState(defaultTheme);
-
-  useEffect(() => {
-    const stored = readStoredTheme();
-    if (stored) {
-      setTheme(stored);
-    }
-  }, []);
+  // Falls back to the config default until the stored override is readable.
+  const theme = useClientValue(
+    useCallback(() => readStoredTheme() ?? defaultTheme, [defaultTheme]),
+    defaultTheme,
+    subscribeToStoredTheme,
+  );
 
   function toggleTheme() {
-    const next = theme === "dark" ? "light" : "dark";
-    setTheme(next);
-    window.localStorage.setItem(STORAGE_KEY, next);
+    writeStoredTheme(theme === "dark" ? "light" : "dark");
   }
 
   return (

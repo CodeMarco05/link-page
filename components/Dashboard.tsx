@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { loadDashboardConfig } from "@/lib/config/load";
 import { collectMonitorSnapshots } from "@/lib/monitor/collect";
 import { GroupSection } from "./GroupSection";
@@ -7,6 +8,10 @@ import { ThemeProvider } from "./ThemeProvider";
 import { ThemeToggle } from "./ThemeToggle";
 
 export async function Dashboard() {
+  // config.yaml and the monitor data dir are runtime mounts, so this page must
+  // render per request rather than being prerendered at build time.
+  await connection();
+
   const config = await loadDashboardConfig();
   const monitorSnapshots = collectMonitorSnapshots(config);
 

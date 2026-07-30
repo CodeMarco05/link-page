@@ -1,29 +1,23 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
-import { groupCollapseStorageKey } from "@/lib/group-collapse-storage";
-
-function readStoredCollapsed(storageKey: string): boolean {
-  if (typeof window === "undefined") {
-    return false;
-  }
-  return window.localStorage.getItem(storageKey) === "1";
-}
+import { useCallback, type ReactNode } from "react";
+import {
+  readGroupCollapsed,
+  subscribeToGroupCollapsed,
+  writeGroupCollapsed,
+} from "@/lib/group-collapse-storage";
+import { useClientValue } from "@/lib/use-client-value";
 
 export function CollapsibleGroup({ name, children }: { name: string; children: ReactNode }) {
-  const storageKey = groupCollapseStorageKey(name);
-  const [collapsed, setCollapsed] = useState(false);
-  const [hydrated, setHydrated] = useState(false);
-
-  useEffect(() => {
-    setCollapsed(readStoredCollapsed(storageKey));
-    setHydrated(true);
-  }, [storageKey]);
+  // null until the client has read localStorage, matching the server render.
+  const collapsed = useClientValue(
+    useCallback(() => readGroupCollapsed(name), [name]),
+    null,
+    subscribeToGroupCollapsed,
+  );
 
   function toggle() {
-    const next = !collapsed;
-    setCollapsed(next);
-    window.localStorage.setItem(storageKey, next ? "1" : "0");
+    writeGroupCollapsed(name, !collapsed);
   }
 
   return (
@@ -40,7 +34,7 @@ export function CollapsibleGroup({ name, children }: { name: string; children: R
         </span>
         {name}
       </button>
-      <div className={hydrated && collapsed ? "hidden" : "contents"}>{children}</div>
+      <div className={collapsed ? "hidden" : "contents"}>{children}</div>
     </section>
   );
 }

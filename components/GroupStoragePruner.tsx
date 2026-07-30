@@ -1,24 +1,16 @@
 "use client";
 
 import { useEffect } from "react";
-import { GROUP_COLLAPSE_STORAGE_PREFIX, groupCollapseStorageKey } from "@/lib/group-collapse-storage";
+import { pruneGroupCollapsed } from "@/lib/group-collapse-storage";
 
+/** Housekeeping only: clears collapse state for groups removed from the config. */
 export function GroupStoragePruner({ groupNames }: { groupNames: string[] }) {
+  // groupNames is a fresh array each render, so depend on its contents instead.
+  const namesKey = JSON.stringify(groupNames);
+
   useEffect(() => {
-    const activeKeys = new Set(groupNames.map(groupCollapseStorageKey));
-
-    const keysToRemove: string[] = [];
-    for (let i = 0; i < window.localStorage.length; i++) {
-      const key = window.localStorage.key(i);
-      if (key && key.startsWith(GROUP_COLLAPSE_STORAGE_PREFIX) && !activeKeys.has(key)) {
-        keysToRemove.push(key);
-      }
-    }
-
-    for (const key of keysToRemove) {
-      window.localStorage.removeItem(key);
-    }
-  }, [groupNames]);
+    pruneGroupCollapsed(JSON.parse(namesKey) as string[]);
+  }, [namesKey]);
 
   return null;
 }

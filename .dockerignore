@@ -1,0 +1,16 @@
+node_modules
+.next
+.git
+.gitignore
+data
+Dockerfile
+compose.yaml
+.dockerignore
+npm-debug.log*
+.pnpm-debug.log*
+*.tsbuildinfo
+.DS_Store
+.env*
+README.md
+AGENTS.md
+CLAUDE.md
