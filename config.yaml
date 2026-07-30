@@ -3,6 +3,7 @@ style: modern
 theme: dark
 columns: 3
 linkTarget: current
+checkIntervalSeconds: 60
 
 groups:
   - name: Dev Tools
@@ -12,9 +13,24 @@ groups:
         icon: https://cdn.simpleicons.org/github
         type: page-monitored
         okStatus: [200, 301]
+        degradedLatencyMs: 500
       - name: Docker Hub
         url: https://hub.docker.com
         icon: https://cdn.simpleicons.org/docker
       - name: Proxmox
         url: https://proxmox.example.com
         icon: https://cdn.simpleicons.org/proxmox
+  - name: Entertainment
+    items:
+      - name: YouTube
+        url: https://youtube.com
+        icon: https://cdn.simpleicons.org/youtube
+      - name: Netflix
+        url: https://netflix.com
+        icon: https://cdn.simpleicons.org/netflix
+      - name: Amazon Prime
+        url: https://primevideo.com
+        icon: https://cdn.simpleicons.org/primevideo
+      - name: X
+        url: https://x.com
+        icon: https://cdn.simpleicons.org/x

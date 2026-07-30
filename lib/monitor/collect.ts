@@ -1,16 +1,21 @@
 import type { DashboardConfig } from "@/lib/config/schema";
-import { checkItemStatus, type MonitorResult } from "./check";
+import { getAllSnapshots, type MonitorSnapshot } from "./store";
 
-export async function collectMonitorResults(
-  config: DashboardConfig,
-): Promise<Map<string, MonitorResult>> {
-  const monitoredItems = config.groups
-    .flatMap((group) => group.items)
-    .filter((item) => item.type === "page-monitored");
-
-  const results = await Promise.all(
-    monitoredItems.map(async (item) => [item.url, await checkItemStatus(item)] as const),
+export function collectMonitorSnapshots(config: DashboardConfig): Map<string, MonitorSnapshot> {
+  const monitoredUrls = new Set(
+    config.groups
+      .flatMap((group) => group.items)
+      .filter((item) => item.type === "page-monitored")
+      .map((item) => item.url),
   );
 
-  return new Map(results);
+  const allSnapshots = getAllSnapshots();
+  const snapshots = new Map<string, MonitorSnapshot>();
+  for (const url of monitoredUrls) {
+    const snapshot = allSnapshots.get(url);
+    if (snapshot) {
+      snapshots.set(url, snapshot);
+    }
+  }
+  return snapshots;
 }

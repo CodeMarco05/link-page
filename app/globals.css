@@ -68,3 +68,17 @@ body {
 .status-glow {
   animation: glow-pulse 3.6s ease-in-out infinite;
 }
+
+@keyframes heartbeat-glow-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--glow-color) 65%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 6px 3px color-mix(in srgb, var(--glow-color) 65%, transparent);
+  }
+}
+
+.heartbeat-glow {
+  animation: heartbeat-glow-pulse 2.4s ease-in-out infinite;
+}

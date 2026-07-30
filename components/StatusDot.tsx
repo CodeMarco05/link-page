@@ -1,5 +1,9 @@
-import type { CSSProperties } from "react";
+"use client";
+
+import { useRef, useState, type CSSProperties } from "react";
+import type { MonitorSnapshot } from "@/lib/monitor/store";
 import type { MonitorStatus } from "@/lib/monitor/check";
+import { Heartbeat } from "./Heartbeat";
 
 const statusColors: Record<MonitorStatus, string> = {
   up: "bg-emerald-500",
@@ -19,30 +23,57 @@ const statusLabels: Record<MonitorStatus, string> = {
   down: "Down",
 };
 
-export function StatusDot({ status, detail }: { status: MonitorStatus; detail?: string }) {
+const OPEN_DELAY_MS = 500;
+const CLOSE_DELAY_MS = 300;
+
+export function StatusDot({ monitor }: { monitor: MonitorSnapshot }) {
+  const { status, detail } = monitor.latest;
   const glowStyle = { "--glow-color": statusGlowColors[status] } as CSSProperties;
 
-  const dot = (
-    <span
-      className={`status-glow inline-block h-2.5 w-2.5 shrink-0 rounded-full ${statusColors[status]}`}
-      style={glowStyle}
-    />
-  );
+  const [showPopover, setShowPopover] = useState(false);
+  const openTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  if (status === "up" || !detail) {
-    return dot;
+  function handleMouseEnter() {
+    clearTimeout(closeTimer.current);
+    if (showPopover) {
+      return;
+    }
+    openTimer.current = setTimeout(() => setShowPopover(true), OPEN_DELAY_MS);
+  }
+
+  function handleMouseLeave() {
+    clearTimeout(openTimer.current);
+    closeTimer.current = setTimeout(() => setShowPopover(false), CLOSE_DELAY_MS);
   }
 
   return (
-    <span className="group/status relative inline-flex">
-      {dot}
+    <span
+      className="relative inline-flex -m-2 items-center justify-center p-2"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <span
-        role="tooltip"
-        className="pointer-events-none absolute bottom-full right-0 z-10 mb-2 w-max max-w-[16rem] whitespace-normal rounded-md border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1.5 text-xs text-[var(--foreground)] opacity-0 shadow-lg transition-opacity duration-100 group-hover/status:opacity-100"
-      >
-        <span className="block font-medium">{statusLabels[status]}</span>
-        <span className="block text-[var(--muted-foreground)]">{detail}</span>
-      </span>
+        className={`status-glow inline-block h-2.5 w-2.5 shrink-0 rounded-full ${statusColors[status]}`}
+        style={glowStyle}
+      />
+      {showPopover && (
+        <span
+          role="tooltip"
+          className="absolute bottom-full right-0 z-20 mb-2 flex w-max flex-col gap-2 whitespace-normal rounded-md border border-[var(--border)] bg-[var(--surface)] px-2.5 py-2 text-xs text-[var(--foreground)] shadow-lg"
+        >
+          <Heartbeat history={monitor.history} />
+          <span>
+            <span className="block font-medium">
+              {statusLabels[status]}{" "}
+              <span className="font-normal text-[var(--muted-foreground)]">
+                latest {monitor.history.length} [n={monitor.sampleCount}]
+              </span>
+            </span>
+            {detail && <span className="block text-[var(--muted-foreground)]">{detail}</span>}
+          </span>
+        </span>
+      )}
     </span>
   );
 }

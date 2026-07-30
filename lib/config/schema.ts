@@ -8,9 +8,11 @@ export const linkTargetNames = ["current", "new-tab"] as const;
 export const linkItemSchema = z.object({
   name: z.string(),
   url: z.string().url(),
-  icon: z.string(),
+  icon: z.string().optional(),
   type: z.enum(itemTypeNames).default("page"),
   okStatus: z.array(z.number().int()).default([200]),
+  checkIntervalSeconds: z.number().int().min(5).optional(),
+  degradedLatencyMs: z.number().int().min(1).default(500),
 });
 
 export const groupSchema = z.object({
@@ -24,6 +26,7 @@ export const dashboardConfigSchema = z.object({
   theme: z.enum(themeNames).default("dark"),
   columns: z.number().int().min(1).max(8).default(3),
   linkTarget: z.enum(linkTargetNames).default("current"),
+  checkIntervalSeconds: z.number().int().min(5).default(60),
   groups: z.array(groupSchema).default([]),
 });
 
